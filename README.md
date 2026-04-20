@@ -28,8 +28,9 @@ El objetivo ha sido simular un entorno real de desarrollo web completo (full-sta
 * MySQL (gestionado con phpMyAdmin)
 * XAMPP(entorno local)
 
-### Calidad de código
-* SonarQube Cloud
+### Herramientas de desarrollo
+* Antigravity (agente de IA).
+* SonarQube Cloud(análisis de calidad de código).
 
 ---
 
@@ -82,7 +83,7 @@ Permite autenticar usuarios desde el frontend.
 ### Pasos:
 1. Clonar el repositorio:
    ```bash
-   git clone https://github.com/tu-usuario/tu-repo.git
+   git clone https://github.com/Byrubio/Proyecto-Zara.git
    ```
 2. Iniciar XAMPP(Apache + MYSQL).
 3. Configurar base de datos en phpMyAdmin.
@@ -106,6 +107,13 @@ Permite autenticar usuarios desde el frontend.
    ```
 
 ---
+## Análisis de código
+Se ha utilizado SonarQube Cloud para:
+
+* Detectar errores
+* Mejorar calidad del código
+* Aplicar buenas prácticas
+---
 
 ##  Capturas (opcional)
 
@@ -114,18 +122,16 @@ Permite autenticar usuarios desde el frontend.
 ---
 
 ##  Objetivos de aprendizaje
-
-* Manipulación del DOM con JavaScript
-* Diseño responsive tipo e-commerce
-* Uso de eventos y lógica de interacción
-* Integración frontend-backend
-* Gestión de datos
+* Desarrollo Full Stack
+* Integración Frontend - Backend
+* Uso de APIs REST
+* Gestión de base de datos
+* Diseño de interfaces tipo e-commerce
 
 ---
 
 ##  Mejoras futuras
 
-* Panel de administración completo
 * Base de datos real
 * Sistema de pagos
 * Autenticación avanzada
