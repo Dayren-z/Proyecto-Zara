@@ -140,6 +140,7 @@ Se ha utilizado SonarQube Cloud para:
 
 ##  Autor
 
-* 
+* Byrubio
+* Dayren-z
 
 ---
