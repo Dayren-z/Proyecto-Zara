@@ -117,9 +117,11 @@ Se ha utilizado SonarQube Cloud para:
 * Aplicar buenas prácticas
 ---
 
-##  Capturas (opcional)
+##  Capturas 
 
-<img width="1885" height="892" alt="image" src="https://github.com/user-attachments/assets/d49be0fc-d44a-416d-ad41-803162f8b8ed" />
+## 📸 Capturas
+
+![Página principal](https://github.com/user-attachments/assets/d49be0fc-d44a-416d-ad41-803162f8b8ed)
 
 
 ---
