@@ -39,12 +39,14 @@ El objetivo ha sido simular un entorno real de desarrollo web completo (full-sta
 *  Página principal con navegación
 *  Carrito de compra dinámico
 *  Buscador de productos
+*  Sistema de favoritos
 *  Página de productos (Baño)
 *  Cambio de vistas (2, 3 y 4 columnas)
 *  Sistema de inicio de sesión
 *  Selección de región (modal)
 *  Gestión de productos desde JavaScript
 *  Conexión con API (login / datos)
+*  Panel de administración (gestión de productos)
 
 ---
 
@@ -117,7 +119,8 @@ Se ha utilizado SonarQube Cloud para:
 
 ##  Capturas (opcional)
 
-*Aquí puedes añadir imágenes del proyecto*
+<img width="1885" height="892" alt="image" src="https://github.com/user-attachments/assets/d49be0fc-d44a-416d-ad41-803162f8b8ed" />
+
 
 ---
 
