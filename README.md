@@ -119,8 +119,6 @@ Se ha utilizado SonarQube Cloud para:
 
 ##  Capturas 
 
-## 📸 Capturas
-
 ![Página principal](https://github.com/user-attachments/assets/d49be0fc-d44a-416d-ad41-803162f8b8ed)
 
 
