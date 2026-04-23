@@ -27,10 +27,13 @@ class AuthController extends Controller
             ], 422);
         }
 
+        $clientRole = \App\Models\Role::firstOrCreate(['name' => 'cliente']);
+
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'password' => $request->password,
+            'role_id' => $clientRole->id,
         ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;
@@ -72,6 +75,7 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'Login successful',
             'user' => $user,
+            'isAdmin' => $user->isAdmin(),
             'token' => $token
         ], 200);
     }

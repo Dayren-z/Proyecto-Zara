@@ -14,6 +14,15 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, Notifiable;
 
+    protected static function booted()
+    {
+        static::deleting(function ($user) {
+            if ($user->email === 'admin@zarahome.com') {
+                throw new \Exception('No se puede eliminar la cuenta del Administrador Maestro.');
+            }
+        });
+    }
+
     /**
      * The attributes that are mass assignable.
      *
@@ -23,7 +32,18 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role_id',
     ];
+
+    public function role()
+    {
+        return $this->belongsTo(Role::class);
+    }
+
+    public function isAdmin()
+    {
+        return $this->role && $this->role->name === 'admin';
+    }
 
     /**
      * The attributes that should be hidden for serialization.

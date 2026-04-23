@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Mi Cuenta | Zara Home</title>
+  <link rel="icon" type="image/png" href="https://ext.same-assets.com/1847217613/1510441429.png" />
   <link rel="stylesheet" href="./css/dashboard.css" />
 </head>
 <body>
@@ -60,9 +61,9 @@
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
           </div>
         </div>
-        <div class="card-content">
-          Aún no has realizado ninguna compra en esta cuenta.
-          <span class="card-number">0</span>
+        <div class="card-content" id="ordersContainer">
+          <p class="empty-state">Aún no has realizado ninguna compra en esta cuenta.</p>
+          <span class="card-number" id="ordersCount">0</span>
           <a href="index.html" class="action-link">Descubrir colecciones</a>
         </div>
       </div>
@@ -129,6 +130,59 @@
         // Poblar datos estéticos
         document.getElementById("welcomeMessage").textContent = `¡HOLA, ${data.name.toUpperCase()}!`;
         document.getElementById("userEmail").textContent = data.email || 'tu email';
+
+        // Fetch Orders
+        try {
+          const ordersResponse = await fetch("http://127.0.0.1:8000/api/orders", {
+            method: "GET",
+            headers: {
+              Authorization: "Bearer " + token,
+              Accept: "application/json",
+            },
+          });
+
+          if (ordersResponse.ok) {
+            const orders = await ordersResponse.json();
+            const ordersContainer = document.getElementById("ordersContainer");
+            const ordersCount = document.getElementById("ordersCount");
+            
+            if (orders.length > 0) {
+              if (ordersCount) ordersCount.textContent = orders.length;
+              
+              let html = '<div class="orders-list" style="max-height: 300px; overflow-y: auto; text-align: left; margin-top: 15px;">';
+              orders.forEach(order => {
+                  const date = new Date(order.created_at).toLocaleDateString();
+                  const total = Number(order.total).toFixed(2);
+                  const status = order.status === 'pending' ? 'Pendiente' : order.status;
+                  
+                  let itemsSummary = order.items.map(item => {
+                      let name = item.product ? item.product.nombre : `Prod #${item.product_id}`;
+                      return `${item.quantity}x ${name}`;
+                  }).join(', ');
+
+                  html += `
+                    <div class="order-item" style="border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px;">
+                      <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <strong>Pedido #${order.id}</strong>
+                        <span style="color: #666; font-size: 0.9em;">${date}</span>
+                      </div>
+                      <div style="font-size: 0.85em; color: #555; margin-bottom: 8px;">
+                        ${itemsSummary}
+                      </div>
+                      <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="background: #f0f0f0; padding: 2px 8px; border-radius: 4px; font-size: 0.8em; text-transform: uppercase;">${status}</span>
+                        <strong>${total} €</strong>
+                      </div>
+                    </div>
+                  `;
+              });
+              html += '</div>';
+              ordersContainer.innerHTML = html;
+            }
+          }
+        } catch (orderError) {
+          console.error("Error fetching orders:", orderError);
+        }
 
       } catch (error) {
         console.error("Error:", error);

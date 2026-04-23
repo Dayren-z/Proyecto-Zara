@@ -1,5 +1,60 @@
 console.log("app.js cargado");
 
+// =========================
+// UI HELPERS (AESTHETIC NOTIFICATIONS)
+// =========================
+
+function showToast(message) {
+  let container = document.querySelector(".toast-container");
+  if (!container) {
+    container = document.createElement("div");
+    container.className = "toast-container";
+    document.body.appendChild(container);
+  }
+
+  const toast = document.createElement("div");
+  toast.className = "toast";
+  toast.innerHTML = `<span>${message}</span>`;
+  container.appendChild(toast);
+
+  // Auto remove after 3 seconds
+  setTimeout(() => {
+    toast.classList.add("fade-out");
+    setTimeout(() => toast.remove(), 400);
+  }, 3000);
+}
+
+function showConfirmCustom(message) {
+  return new Promise((resolve) => {
+    const overlay = document.createElement("div");
+    overlay.className = "custom-confirm-overlay";
+    overlay.innerHTML = `
+      <div class="custom-confirm-modal">
+        <p class="confirm-text">${message}</p>
+        <div class="confirm-buttons">
+          <button class="confirm-btn confirm-btn-no" id="confirmNo">CANCELAR</button>
+          <button class="confirm-btn confirm-btn-yes" id="confirmYes">ACEPTAR</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+
+    // Trigger animation
+    setTimeout(() => overlay.classList.add("active"), 10);
+
+    const cleanup = (result) => {
+      overlay.classList.remove("active");
+      setTimeout(() => overlay.remove(), 300);
+      resolve(result);
+    };
+
+    overlay.querySelector("#confirmYes").onclick = () => cleanup(true);
+    overlay.querySelector("#confirmNo").onclick = () => cleanup(false);
+    overlay.onclick = (e) => { if (e.target === overlay) cleanup(false); };
+  });
+}
+
+
 /*COMPORTAMIENTO HAMBURGUESAS-SOLO ESCRITORIO*/
 const hamburgerBtn = document.getElementById("hamburger-btn");
 const dropdownMenu = document.getElementById("dropdownMenu");
@@ -311,8 +366,9 @@ function initAuthSystem() {
         });
         const data = await res.json();
         if (!res.ok) {
+          console.error("Login Error:", data);
           if (errorDiv) {
-            errorDiv.textContent = data.message === "Invalid credentials" ? "Email o contraseña incorrectos." : (data.message || "Error.");
+            errorDiv.textContent = data.errors ? Object.values(data.errors).flat().join(" ") : (data.message || "Error.");
             errorDiv.style.display = "block";
           }
           return;
@@ -320,7 +376,11 @@ function initAuthSystem() {
         localStorage.setItem("token", data.token);
         localStorage.setItem("user_name", data.user.name);
         closeAuthModal();
-        window.location.href = "dashboard.html";
+        if (data.isAdmin) {
+          window.location.href = "admin.html";
+        } else {
+          window.location.href = "dashboard.html";
+        }
       } catch (err) {
         if (errorDiv) {
           errorDiv.textContent = "Error de conexión. ¿Arrancaste php artisan serve?";
@@ -351,20 +411,35 @@ function initAuthSystem() {
             password: document.getElementById("regPassword").value
           })
         });
-        const data = await res.json();
-        if (!res.ok) {
+
+        const contentType = res.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+           const data = await res.json();
+           if (!res.ok) {
+            console.error("Registration Error JSON:", data);
+            if (errorDiv) {
+              errorDiv.textContent = data.errors ? Object.values(data.errors).flat().join(" ") : (data.message || "Error.");
+              errorDiv.style.display = "block";
+            }
+            return;
+          }
+        } else {
+          const text = await res.text();
+          console.error("Server returned non-JSON response:", text);
           if (errorDiv) {
-            errorDiv.textContent = data.errors ? Object.values(data.errors).flat().join(" ") : (data.message || "Error.");
+            errorDiv.textContent = "Error interno del servidor (500). Mira la consola para más detalles.";
             errorDiv.style.display = "block";
           }
           return;
         }
-        alert("Cuenta creada con éxito. Ahora puedes iniciar sesión.");
+
+        showToast("Cuenta creada con éxito. Ahora puedes iniciar sesión.");
         showLoginForm();
         registerForm.reset();
       } catch (err) {
+        console.error("Fetch/Network Error:", err);
         if (errorDiv) {
-          errorDiv.textContent = "Error de conexión.";
+          errorDiv.textContent = "Error de conexión. ¿Arrancaste php artisan serve?";
           errorDiv.style.display = "block";
         }
       } finally {
@@ -713,6 +788,83 @@ function renderCartDropdown() {
 
   // Renderizar el carrito al iniciar
   renderCartDropdown();
+
+  // === LÓGICA DE PROCESAR PEDIDO (CHECKOUT) ===
+  const checkoutBtns = document.querySelectorAll(".checkout-btn");
+  checkoutBtns.forEach(btn => {
+    btn.addEventListener("click", async (e) => {
+      e.stopPropagation();
+      const token = localStorage.getItem("token");
+      const cart = getCart();
+
+      if (cart.length === 0) {
+        showToast("Tu carrito está vacío.");
+        return;
+      }
+
+      // Si no hay sesión, abrir modal de autenticación
+      if (!token) {
+        const cartDropdown = document.getElementById("cartDropdown");
+        if (cartDropdown) cartDropdown.classList.add("hidden");
+        
+        const authModal = document.getElementById("authModal");
+        if (authModal) {
+          authModal.classList.remove("hidden");
+          document.body.style.overflow = "hidden";
+        } else {
+          showToast("Por favor, inicia sesión para continuar.");
+        }
+        return;
+      }
+
+      // Confirmación
+      const confirmed = await showConfirmCustom("¿Deseas finalizar tu compra?");
+      if (!confirmed) return;
+
+      // Si hay sesión y carrito, realizar petición al backend
+      const originalText = btn.textContent;
+      btn.textContent = "PROCESANDO...";
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(`${API_URL}/orders`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ cart: cart })
+        });
+        
+        const data = await res.json();
+        
+        if (res.ok) {
+          // Vaciar carrito
+          localStorage.removeItem("zarahome_cart");
+          localStorage.removeItem("zarahome_bath_cart");
+          updateCartDisplayAll();
+          
+          const cartDropdown = document.getElementById("cartDropdown");
+          if (cartDropdown) cartDropdown.classList.add("hidden");
+          
+          showToast("¡Pedido realizado con éxito!");
+          // Redirigir al dashboard para ver el pedido
+          setTimeout(() => {
+            window.location.href = "dashboard.html";
+          }, 1500);
+        } else {
+          showToast("Error al procesar el pedido: " + (data.message || "Desconocido"));
+        }
+      } catch (err) {
+        console.error(err);
+        showToast("Error de conexión al procesar el pedido.");
+      } finally {
+        btn.textContent = originalText;
+        btn.disabled = false;
+      }
+    });
+  });
 })();
 
 // Mostrar mensaje de producto añadido

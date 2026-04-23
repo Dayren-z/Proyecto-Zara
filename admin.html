@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel | Zara Home</title>
+  <link rel="icon" type="image/png" href="https://ext.same-assets.com/1847217613/1510441429.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Manrope:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./css/admin.css">
+  <link rel="stylesheet" href="./css/style.css"> <!-- Para reusar toast UI -->
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="admin-sidebar">
+    <a href="index.html" class="admin-logo">ZARA HOME</a>
+    <ul class="admin-nav">
+      <li class="admin-nav-item active" data-tab="users">Usuarios</li>
+      <li class="admin-nav-item" data-tab="orders">Pedidos</li>
+      <li class="admin-nav-item" data-tab="customers">Clientes</li>
+    </ul>
+    <div class="admin-logout">
+      <button class="admin-logout-btn" id="logoutBtn">Volver a Tienda</button>
+    </div>
+  </aside>
+
+  <!-- Main Area -->
+  <main class="admin-main">
+    
+    <!-- Tab Usuarios -->
+    <div id="tab-users" class="tab-panel active">
+      <div class="admin-header">
+        <h1 class="admin-title">Gestión de Usuarios</h1>
+        <div class="admin-actions">
+          <button id="createUserBtn">+ Nuevo Usuario</button>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Email</th>
+            <th>Rol</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="usersTableBody">
+          <!-- Dinámico -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Tab Pedidos -->
+    <div id="tab-orders" class="tab-panel">
+      <div class="admin-header">
+        <h1 class="admin-title">Gestión de Pedidos</h1>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Cliente Correo</th>
+            <th>Fecha</th>
+            <th>Total</th>
+            <th>Estado</th>
+            <th>Productos</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="ordersTableBody">
+          <!-- Dinámico -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Tab Clientes -->
+    <div id="tab-customers" class="tab-panel">
+      <div class="admin-header">
+        <h1 class="admin-title">Listado de Clientes</h1>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>ID Cliente</th>
+            <th>Usuario Asoc.</th>
+            <th>Teléfono</th>
+            <th>Dirección</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="customersTableBody">
+          <!-- Dinámico -->
+        </tbody>
+      </table>
+    </div>
+
+  </main>
+
+  <!-- Modal UI for Creating/Editing Users -->
+  <div class="admin-modal-overlay" id="userModal">
+    <div class="admin-modal">
+      <h2 style="font-family: 'Cormorant Garamond';font-size:24px;margin-bottom:20px;text-align:left;">Usuario</h2>
+      <form id="userForm">
+        <input type="hidden" id="userId" />
+        <div class="form-group">
+          <label>Nombre</label>
+          <input type="text" id="userName" required>
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="userEmail" required>
+        </div>
+        <div class="form-group">
+          <label>Contraseña</label>
+          <input type="password" id="userPassword" placeholder="(Dejar vacío para no cambiar si editas)">
+        </div>
+        <div class="form-group">
+          <label>Rol</label>
+          <select id="userRole" required>
+            <!-- Llenado dinámico -->
+          </select>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" id="closeUserModal">Cancelar</button>
+          <button type="submit" class="btn-submit">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal UI for Editing Customers -->
+  <div class="admin-modal-overlay" id="customerModal">
+    <div class="admin-modal">
+      <h2 style="font-family: 'Cormorant Garamond';font-size:24px;margin-bottom:20px;text-align:left;">Editar Cliente</h2>
+      <form id="customerForm">
+        <input type="hidden" id="customerId" />
+        <div class="form-group">
+          <label>Teléfono</label>
+          <input type="text" id="customerPhone" placeholder="Ej: +34 600 000 000">
+        </div>
+        <div class="form-group">
+          <label>Dirección</label>
+          <input type="text" id="customerAddress" placeholder="Calle, Número, Ciudad...">
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" id="closeCustomerModal">Cancelar</button>
+          <button type="submit" class="btn-submit">Guardar Cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="./js/admin.js"></script>
+</body>
+</html>
