@@ -19,7 +19,7 @@ El objetivo ha sido simular un entorno real de desarrollo web completo (full-sta
 * JavaScript (Vanilla)
 
 ### Backend
-* PHP
+* PHP 8.2
 * Laravel 12
 * Composer
 
@@ -70,12 +70,17 @@ Esta sección detalla los paquetes utilizados y los puntos de acceso para intera
 
 Se han utilizado las siguientes librerías de la comunidad Laravel para agilizar el desarrollo:
 
+**Backend**
 *   **Laravel 12:** Framework base del proyecto.
+*   **PHP 8.2**
 *   **Laravel Sanctum (v4.0):** Encargado de la seguridad y autenticación mediante tokens de los endpoints.
 *   **Laravel Tinker:** Para la depuración y ejecución de código en tiempo real desde la consola.
+**Herramientas de desarrollo**
 *   **FakerPHP:** Para la generación de datos de prueba (seeders) en la base de datos.
-*   **Laravel Sail:** Configuración de entorno de desarrollo basado en Docker.
-*   **PHPUnit:** Herramienta para la ejecución de pruebas unitarias y de integración.
+*   **Laravel Pint:** formateo de código
+*   **Laravel Pail:** monitorización de logs
+*   **SonarQube Cloud:** análisis de calidad de código
+*   **Antigravity:** asistente de IA para desarrollo
 
 ---
 
