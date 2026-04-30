@@ -27,13 +27,21 @@ class AuthController extends Controller
             ], 422);
         }
 
-        $clientRole = \App\Models\Role::firstOrCreate(['name' => 'cliente']);
+        // Determinar el rol: si es el correo maestro, darle admin automáticamente
+        $roleId = null;
+        if ($request->email === 'admin@zarahome.com') {
+            $adminRole = \App\Models\Role::firstOrCreate(['name' => 'admin']);
+            $roleId = $adminRole->id;
+        } else {
+            $clientRole = \App\Models\Role::firstOrCreate(['name' => 'cliente']);
+            $roleId = $clientRole->id;
+        }
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => $request->password,
-            'role_id' => $clientRole->id,
+            'password' => $request->password, // Nota: el modelo ya lo hashea o deberíamos hashearlo
+            'role_id' => $roleId,
         ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;

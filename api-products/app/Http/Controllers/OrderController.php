@@ -83,4 +83,32 @@ class OrderController extends Controller
             ], 500);
         }
     }
+
+    public function cancel($id)
+    {
+        $user = auth()->user();
+        $customer = Customer::where('user_id', $user->id)->first();
+
+        if (!$customer) {
+            return response()->json(['message' => 'No customer found'], 404);
+        }
+
+        $order = Order::where('id', $id)->where('customer_id', $customer->id)->first();
+
+        if (!$order) {
+            return response()->json(['message' => 'Order not found or unauthorized'], 404);
+        }
+
+        if (!in_array($order->status, ['pending', 'processing'])) {
+            return response()->json(['message' => 'Only pending or processing orders can be cancelled'], 400);
+        }
+
+        $order->status = 'cancelled';
+        $order->save();
+
+        return response()->json([
+            'message' => 'Pedido cancelado con éxito',
+            'order' => $order
+        ]);
+    }
 }

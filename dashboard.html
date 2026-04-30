@@ -169,12 +169,22 @@
               orders.forEach(order => {
                   const date = new Date(order.created_at).toLocaleDateString();
                   const total = Number(order.total).toFixed(2);
-                  const status = order.status === 'pending' ? 'Pendiente' : order.status;
+                  
+                  let statusText = order.status;
+                  if (order.status === 'pending') statusText = 'Pendiente';
+                  if (order.status === 'processing') statusText = 'Procesando';
+                  if (order.status === 'cancelled') statusText = 'Cancelado';
                   
                   let itemsSummary = order.items.map(item => {
                       let name = item.product ? item.product.nombre : `Prod #${item.product_id}`;
                       return `${item.quantity}x ${name}`;
                   }).join(', ');
+
+                  // Botón de cancelar solo para pendientes
+                  let cancelButton = '';
+                  if (order.status === 'pending' || order.status === 'processing') {
+                    cancelButton = `<button class="cancel-order-btn" data-id="${order.id}" style="background: none; border: none; color: #d9534f; text-decoration: underline; cursor: pointer; font-size: 0.8em; margin-left: 10px;">Cancelar</button>`;
+                  }
 
                   html += `
                     <div class="order-item" style="border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px;">
@@ -186,7 +196,10 @@
                         ${itemsSummary}
                       </div>
                       <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="background: #f0f0f0; padding: 2px 8px; border-radius: 4px; font-size: 0.8em; text-transform: uppercase;">${status}</span>
+                        <div>
+                          <span style="background: #f0f0f0; padding: 2px 8px; border-radius: 4px; font-size: 0.8em; text-transform: uppercase;">${statusText}</span>
+                          ${cancelButton}
+                        </div>
                         <strong>${total} €</strong>
                       </div>
                     </div>
@@ -194,6 +207,48 @@
               });
               html += '</div>';
               ordersContainer.innerHTML = html;
+
+              // Añadir event listeners a los botones de cancelar
+              document.querySelectorAll('.cancel-order-btn').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                  const orderId = e.target.dataset.id;
+                  
+                  // Crear un overlay de confirmación rápido estético
+                  const overlay = document.createElement("div");
+                  overlay.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:9999;";
+                  overlay.innerHTML = `
+                    <div style="background:white;padding:30px;border-radius:8px;max-width:400px;text-align:center;">
+                      <p style="margin-bottom:20px;font-family:'Cormorant Garamond',serif;font-size:1.2rem;">¿Seguro que deseas cancelar este pedido?</p>
+                      <button id="btnNo" style="background:transparent;border:1px solid #ccc;padding:8px 16px;cursor:pointer;margin-right:10px;">VOLVER</button>
+                      <button id="btnYes" style="background:#000;color:#fff;border:none;padding:8px 16px;cursor:pointer;">CANCELAR PEDIDO</button>
+                    </div>
+                  `;
+                  document.body.appendChild(overlay);
+
+                  overlay.querySelector('#btnNo').onclick = () => overlay.remove();
+                  overlay.querySelector('#btnYes').onclick = async () => {
+                    overlay.remove();
+                    try {
+                      const cancelRes = await fetch(`http://127.0.0.1:8000/api/orders/${orderId}/cancel`, {
+                        method: 'PUT',
+                        headers: {
+                          'Authorization': 'Bearer ' + token,
+                          'Accept': 'application/json'
+                        }
+                      });
+                      if (cancelRes.ok) {
+                        // Recargar la página para ver el cambio
+                        window.location.reload();
+                      } else {
+                        const data = await cancelRes.json();
+                        alert(data.message || 'Error al cancelar');
+                      }
+                    } catch (err) {
+                      console.error("Error al cancelar:", err);
+                    }
+                  };
+                });
+              });
             }
           }
         } catch (orderError) {
